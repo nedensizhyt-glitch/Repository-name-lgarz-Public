@@ -611,7 +611,9 @@ setInterval(()=>{
   broadcast();
 },100);
 
-
+app.get("/",(req,res)=>{
+  res.sendFile(path.join(__dirname,"public","index.html"));
+});
 server.listen(PORT,()=>{
   console.log(
     "LGARZ WebSocket server http://localhost:"+PORT
