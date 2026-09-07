@@ -33,6 +33,7 @@ function R(m){
 }
 
 async function play(){
+  let ws;
   name=nameEl.value.trim()||"Ganiko47";
 
   const r=await fetch("/api/login",{
@@ -46,6 +47,26 @@ async function play(){
   if(!r.ok)return alert(j.error);
 
   token=j.token;
+  ws=new WebSocket(
+  location.protocol==="https:"
+    ?"wss://"+location.host+"/ws?token="+token
+    :"ws://"+location.host+"/ws?token="+token
+);
+
+ws.onmessage=e=>{
+  const j=JSON.parse(e.data);
+
+  if(j.type==="state"){
+    world=j.players||[];
+    foods=j.foods||[];
+    cells=world.filter(p=>p.owner===name);
+
+    document.getElementById("board").innerHTML=
+      (j.leaderboard||[]).map((p,i)=>
+        `<div class="row"><span>${i+1}. ${p.id}</span><b>${Math.floor(p.m)}</b></div>`
+      ).join("");
+  }
+};
   login.style.display="none";
 
   await get();
@@ -54,9 +75,8 @@ async function play(){
   setInterval(send,120);
   setInterval(get,300);
 }
-
-async function send(){
-  if(!token||!cells.length)return;
+  function send(){
+  if(!ws||ws.readyState!==WebSocket.OPEN||!cells.length)return;
 
   for(const cell of cells){
     const dx=mouse.x-W/2;
@@ -69,37 +89,23 @@ async function send(){
     cell.y+=(dy/d)*speed;
   }
 
-  await fetch("/api/move",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+token
-    },
-    body:JSON.stringify({cells})
-  });
+  ws.send(JSON.stringify({
+    type:"move",
+    cells
+  }));
 }
-
-async function split(){
-  if(!token||!cells.length)return;
+function split(){
+  if(!ws||ws.readyState!==WebSocket.OPEN||!cells.length)return;
 
   const dx=mouse.x-W/2;
   const dy=mouse.y-H/2;
 
-  await fetch("/api/split",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+token
-    },
-    body:JSON.stringify({
-      x:cells[0].x+dx,
-      y:cells[0].y+dy
-    })
-  });
-
-  await get();
+  ws.send(JSON.stringify({
+    type:"split",
+    x:cells[0].x+dx,
+    y:cells[0].y+dy
+  }));
 }
-
 async function get(){
   const r=await fetch("/api/state",{
     headers:{
