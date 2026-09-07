@@ -99,7 +99,17 @@ function getCells(){
 
   return result;
 }
+const foods=[];
 
+for(let i=0;i<300;i++){
+  foods.push({
+    id:crypto.randomUUID(),
+    x:Math.random()*9800-4900,
+    y:Math.random()*9800-4900,
+    m:1,
+    color:"#ffd34d"
+  });
+}
 function getGameState(){
   const cells=getCells();
   const totals={};
@@ -115,6 +125,7 @@ function getGameState(){
 
   return{
     players:cells,
+    foods,
     leaderboard
   };
 }
@@ -424,13 +435,42 @@ wss.on("connection",(ws,req)=>{
             b.skin||cell.skin
           );
         }
-      }
+      
+        
+        
+        
+        
+        
+        
+        
+        for(const cell of player.cells){
+  for(let i=foods.length-1;i>=0;i--){
+    const food=foods[i];
+
+    const distance=Math.hypot(
+      cell.x-food.x,
+      cell.y-food.y
+    );
+
+    if(distance<Math.sqrt(cell.m)*3.2){
+      cell.m+=food.m;
+      foods.splice(i,1);
+
+      foods.push({
+        id:crypto.randomUUID(),
+        x:Math.random()*9800-4900,
+        y:Math.random()*9800-4900,
+        m:1,
+        color:"#ffd34d"
+      });
+    }
+  }
+}
 
 
       /* BÖLÜNME */
-
       if(data.type==="split"){
-
+        
         splitPlayer(
           ws.user,
           Number(data.x)||0,
