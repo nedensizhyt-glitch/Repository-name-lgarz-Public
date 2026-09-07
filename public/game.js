@@ -6,6 +6,7 @@ const nameEl=document.getElementById("name");
 let W,H,token,name;
 let cells=[];
 let world=[];
+let foods=[];
 let mouse={x:innerWidth/2,y:innerHeight/2};
 
 function resize(){
@@ -111,6 +112,7 @@ async function get(){
   const j=await r.json();
 
   world=j.players||[];
+  foods=j.foods||[];
 
   cells=world.filter(p=>p.owner===name);
 
@@ -157,7 +159,17 @@ function loop(){
     x.lineTo(W,a);
     x.stroke();
   }
+for(const food of foods){
+  const fx=food.x-cx+W/2;
+  const fy=food.y-cy+H/2;
 
+  if(fx<-20||fy<-20||fx>W+20||fy>H+20)continue;
+
+  x.beginPath();
+  x.arc(fx,fy,5,0,Math.PI*2);
+  x.fillStyle=food.color||"#ffd34d";
+  x.fill();
+}
   for(const p of world){
     const sx=p.x-cx+W/2;
     const sy=p.y-cy+H/2;
