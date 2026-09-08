@@ -466,7 +466,7 @@ wss.on("connection",(ws,req)=>{
     }
   }
 }
-
+}
 
       /* BÖLÜNME */
       if(data.type==="split"){
