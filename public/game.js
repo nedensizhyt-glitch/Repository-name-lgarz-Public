@@ -4,6 +4,7 @@ const login=document.getElementById("login");
 const nameEl=document.getElementById("name");
 
 let W,H,token,name;
+let ws;
 let cells=[];
 let world=[];
 let foods=[];
@@ -33,7 +34,6 @@ function R(m){
 }
 
 async function play(){
-  let ws;
   name=nameEl.value.trim()||"Ganiko47";
 
   const r=await fetch("/api/login",{
